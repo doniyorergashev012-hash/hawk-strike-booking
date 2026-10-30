@@ -1,0 +1,8 @@
+<!doctype html><html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hawk Strike — Kirish</title><link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body><main class="login-wrap"><form method="post" class="login-card">
+<h1>Hawk Strike</h1><p class="muted">Admin / Barber panel</p>
+{% with messages = get_flashed_messages() %}{% for m in messages %}<p class="notice error">{{ m }}</p>{% endfor %}{% endwith %}
+<label>Login / Логин</label><input name="username" required>
+<label>Parol / Пароль</label><input name="password" type="password" required>
+<button class="primary">Kirish / Войти</button></form></main></body></html>

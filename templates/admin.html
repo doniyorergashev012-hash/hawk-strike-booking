@@ -1,0 +1,11 @@
+<!doctype html><html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hawk Strike — Panel</title><link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body><main class="admin-wrap"><header class="admin-head"><div><p class="top-mark">BOSHQARUV / УПРАВЛЕНИЕ</p><h1>{{ shop_name }}</h1><p class="muted">{{ username }} · {{ 'Administrator' if role=='admin' else 'Barber' }}</p></div><a href="/admin/logout">Chiqish / Выйти</a></header>
+<h2 class="section-title">Yozilishlar / Записи</h2>
+<div class="table-wrap"><table><thead><tr><th>Sana / vaqt</th><th>Mijoz</th><th>Telefon</th><th>Mutaxassis</th><th>Xizmat</th><th>Holat</th><th>Amal</th></tr></thead><tbody>
+{% for b in bookings %}<tr><td>{{ b.booking_date }}<br>{{ b.booking_time }}</td><td>{{ b.customer_name }}</td><td>{{ b.phone }}</td><td>{{ b.stylist }}</td><td>{{ b.service }}<br>{{ "{:,}".format(b.price) }} so‘m</td><td>{{ b.status }}</td><td class="actions">
+<form method="post" action="/admin/booking/{{ b.id }}/confirmed"><button title="Tasdiqlash">✓</button></form>
+<form method="post" action="/admin/booking/{{ b.id }}/done"><button title="Yakunlash">★</button></form>
+<form method="post" action="/admin/booking/{{ b.id }}/cancelled"><button title="Bekor qilish">✕</button></form>
+</td></tr>{% else %}<tr><td colspan="7">Hozircha yozilishlar yo‘q / Пока записей нет.</td></tr>{% endfor %}
+</tbody></table></div></main></body></html>

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ shop_name }} — Barbershop</title>
+<style>
+:root{--bg:#101010;--panel:#1b1b1b;--gold:#d6b77a;--muted:#aaa;--line:#333}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f5f5f5;font-family:Arial,sans-serif}
+main{max-width:760px;margin:auto;padding:20px}.hero{padding:52px 18px 36px;text-align:center;background:linear-gradient(145deg,#242424,#101010);border:1px solid var(--line);border-radius:22px}
+.logo{font-size:42px;color:var(--gold)}h1{letter-spacing:5px;margin:12px 0 4px;font-size:clamp(30px,7vw,48px)}.sub{color:var(--gold);letter-spacing:4px;font-size:12px}
+.tag{color:#ccc;margin-top:20px}.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:18px 0}
+a.menu{display:block;text-decoration:none;color:#fff;background:var(--panel);border:1px solid var(--line);padding:19px 12px;border-radius:15px;text-align:center}
+.menu b{display:block;margin:8px 0}.menu small{color:var(--muted)}.ico{font-size:25px;color:var(--gold)}
+section{margin-top:28px}.section-title{font-size:20px;border-bottom:1px solid var(--line);padding-bottom:12px}
+.item,.person{background:var(--panel);padding:14px;border:1px solid var(--line);border-radius:13px;margin:10px 0}
+.item{display:flex;justify-content:space-between;gap:12px}.price{color:var(--gold);white-space:nowrap}
+.person{display:flex;gap:14px;align-items:center}.avatar{width:58px;height:58px;flex:0 0 58px;border-radius:50%;display:grid;place-items:center;background:#333;color:var(--gold);font-size:22px}
+.person p{margin:5px 0;color:var(--muted);font-size:13px}.cta{display:block;background:var(--gold);color:#111;text-decoration:none;text-align:center;font-weight:bold;padding:16px;border-radius:12px;margin-top:22px}
+.address{color:#ccc;line-height:1.6}.map{color:var(--gold)}footer{text-align:center;color:#777;padding:30px 0 10px;font-size:12px}
+@media(max-width:430px){main{padding:13px}.actions{gap:8px}.menu{padding:15px 8px!important}}
+</style>
+</head>
+<body><main>
+<header class="hero">
+<div class="logo">✂</div><h1>HAWK STRIKE</h1><div class="sub">BARBERSHOP</div>
+<p class="tag">Your style. Your choice.</p>
+</header>
+<nav class="actions">
+<a class="menu" href="#team"><span class="ico">♙</span><b>SARTAROSHLAR</b><small>Ustalar bilan tanishing</small></a>
+<a class="menu" href="#prices"><span class="ico">₸</span><b>NARXLAR</b><small>Xizmatlar narxi</small></a>
+<a class="menu" href="#location"><span class="ico">⌖</span><b>LOKATSIYA</b><small>Manzil va xarita</small></a>
+<a class="menu" href="/app"><span class="ico">▣</span><b>ZAKAS QILISH</b><small>Telegram orqali band qilish</small></a>
+</nav>
+<section id="prices"><h2 class="section-title">Xizmatlar va narxlar</h2>
+{% for s in services %}<div class="item"><span>{{ s.name }}</span><span class="price">{{ "{:,}".format(s.price).replace(",", " ") }} so‘m</span></div>{% endfor %}
+</section>
+<section id="team"><h2 class="section-title">Bizning sartaroshlar</h2>
+{% for s in stylists %}<div class="person"><div class="avatar">{{ s.name[:1] }}</div><div><b>{{ s.name }}</b><p>{{ s.title or "BARBER" }} · Profil ma’lumotlari tez orada to‘ldiriladi</p></div></div>{% endfor %}
+</section>
+<section id="location"><h2 class="section-title">Bizning manzil</h2><p class="address">{{ address }}</p>
+{% if maps_url %}<a class="map" href="{{ maps_url }}" target="_blank" rel="noopener">Xaritada ochish →</a>{% else %}<span class="map">Xarita havolasi manzil kiritilgach qo‘shiladi.</span>{% endif %}
+</section>
+<a class="cta" href="/app">TELEGRAM ORQALI ZAKAS QILISH</a>
+<footer>© {{ shop_name }} · O‘zbekcha / Русский</footer>
+</main></body></html>
