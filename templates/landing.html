@@ -28,8 +28,10 @@ section{margin-top:28px}.section-title{font-size:20px;border-bottom:1px solid va
 <nav class="actions">
 <a class="menu" href="#team"><span class="ico">♙</span><b>SARTAROSHLAR</b><small>Ustalar bilan tanishing</small></a>
 <a class="menu" href="#prices"><span class="ico">₸</span><b>NARXLAR</b><small>Xizmatlar narxi</small></a>
-<a class="menu" href="#location"><span class="ico">⌖</span><b>LOKATSIYA</b><small>Manzil va xarita</small></a>
-<a class="menu" href="/app"><span class="ico">▣</span><b>ZAKAS QILISH</b><small>Telegram orqali band qilish</small></a>
+<a class="menu" href="https://yandex.uz/maps/org/hawk_strike/74323681999/?ll=69.289061%2C41.307690&z=16.92" target="_blank" rel="noopener">
+<span class="ico">⌖</span><b>LOKATSIYA</b><small>Yandex Maps orqali manzil</small>
+</a>
+<a class="menu" href="/app"><span class="ico">▣</span><b>ZAKAS QILISH</b><small>Sayt orqali buyurtma berish</small></a>
 </nav>
 <section id="prices"><h2 class="section-title">Xizmatlar va narxlar</h2>
 {% for s in services %}<div class="item"><span>{{ s.name }}</span><span class="price">{{ "{:,}".format(s.price).replace(",", " ") }} so‘m</span></div>{% endfor %}
@@ -37,9 +39,6 @@ section{margin-top:28px}.section-title{font-size:20px;border-bottom:1px solid va
 <section id="team"><h2 class="section-title">Bizning sartaroshlar</h2>
 {% for s in stylists %}<div class="person"><div class="avatar">{{ s.name[:1] }}</div><div><b>{{ s.name }}</b><p>{{ s.title or "BARBER" }} · Profil ma’lumotlari tez orada to‘ldiriladi</p></div></div>{% endfor %}
 </section>
-<section id="location"><h2 class="section-title">Bizning manzil</h2><p class="address">{{ address }}</p>
-{% if maps_url %}<a class="map" href="{{ maps_url }}" target="_blank" rel="noopener">Xaritada ochish →</a>{% else %}<span class="map">Xarita havolasi manzil kiritilgach qo‘shiladi.</span>{% endif %}
-</section>
-<a class="cta" href="/app">TELEGRAM ORQALI ZAKAS QILISH</a>
+<a class="cta" href="/app">ZAKAS QILISH</a>
 <footer>© {{ shop_name }} · O‘zbekcha / Русский</footer>
 </main></body></html>

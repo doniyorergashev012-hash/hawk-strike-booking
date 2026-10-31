@@ -1,6 +1,12 @@
 <!doctype html><html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Hawk Strike — Panel</title><link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
 <body><main class="admin-wrap"><header class="admin-head"><div><p class="top-mark">BOSHQARUV / УПРАВЛЕНИЕ</p><h1>{{ shop_name }}</h1><p class="muted">{{ username }} · {{ 'Administrator' if role=='admin' else 'Barber' }}</p></div><a href="/admin/logout">Chiqish / Выйти</a></header>
+{% with messages = get_flashed_messages() %}{% if messages %}<div class="notice success">{% for message in messages %}<p>{{ message }}</p>{% endfor %}</div>{% endif %}{% endwith %}
+{% if role == 'admin' %}<h2 class="section-title">Telegram bog‘lash / Привязка Telegram</h2>
+<p class="muted">Sartaroshga kod yarating. U botga kirib <b>/link KOD</b> yuboradi. Kod 15 daqiqada tugaydi va bir marta ishlaydi.</p>
+<div class="table-wrap"><table><thead><tr><th>Sartarosh</th><th>Telegram holati</th><th>Amal</th></tr></thead><tbody>
+{% for st in stylists %}<tr><td>{{ st.name }}</td><td>{{ 'Bog‘langan' if st.telegram_chat_id else 'Bog‘lanmagan' }}</td><td><form method="post" action="/admin/stylist/{{ st.id }}/telegram-code"><button class="primary" type="submit">Kod yaratish</button></form></td></tr>{% endfor %}
+</tbody></table></div>{% endif %}
 <h2 class="section-title">Yozilishlar / Записи</h2>
 <div class="table-wrap"><table><thead><tr><th>Sana / vaqt</th><th>Mijoz</th><th>Telefon</th><th>Mutaxassis</th><th>Xizmat</th><th>Holat</th><th>Amal</th></tr></thead><tbody>
 {% for b in bookings %}<tr><td>{{ b.booking_date }}<br>{{ b.booking_time }}</td><td>{{ b.customer_name }}</td><td>{{ b.phone }}</td><td>{{ b.stylist }}</td><td>{{ b.service }}<br>{{ "{:,}".format(b.price) }} so‘m</td><td>{{ b.status }}</td><td class="actions">
