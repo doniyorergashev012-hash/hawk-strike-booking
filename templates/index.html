@@ -1,28 +1,112 @@
 <!doctype html>
-<html lang="uz"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{ shop_name }} — Online booking</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<script src="https://telegram.org/js/telegram-web-app.js"></script></head>
-<body><main class="app-shell">
-<div class="language-row"><span class="top-mark">✦ ONLINE BOOKING</span><button id="lang-toggle" class="lang-toggle">РУССКИЙ</button></div>
-<header class="hero"><div class="logo">✂</div><h1>{{ shop_name }}</h1>
-<p data-uz="MUTAXASSISNI TANLANG" data-ru="ВЫБЕРИТЕ МАСТЕРА">MUTAXASSISNI TANLANG</p><div class="line"></div></header>
-<section><h2 class="section-title" data-uz="Mutaxassislar" data-ru="Мастера">Mutaxassislar</h2>
-<div class="cards">{% for s in stylists %}
-<button class="stylist-card" data-id="{{ s.id }}" data-name="{{ s.name }}"><span class="avatar">{{ s.name[:1] }}</span>
-<span class="person"><strong>{{ s.name }}</strong><small data-uz="BARBER" data-ru="БАРБЕР">BARBER</small></span><span class="arrow">›</span></button>
-{% endfor %}</div></section>
-<section class="booking hidden" id="booking"><h2 class="section-title" data-uz="Yozilish ma’lumotlari" data-ru="Данные записи">Yozilish ma’lumotlari</h2>
-<div class="selected" id="selected-stylist">Mutaxassis tanlanmagan</div>
-<label data-uz="Xizmat turi" data-ru="Услуга">Xizmat turi</label>
-<select id="service">{% for s in services %}
-<option value="{{ s.id }}" {% if selected_service|string == s.id|string %}selected{% endif %} data-name-uz="{{ s.name }}" data-name-ru="{{ s.name_ru }}">{{ s.name }} — {{ "{:,}".format(s.price) }} so‘m ({{ s.duration }} min)</option>
-{% endfor %}</select>
-<label data-uz="Sana" data-ru="Дата">Sana</label><input id="date" type="date">
-<label data-uz="Bo‘sh vaqt" data-ru="Свободное время">Bo‘sh vaqt</label><div class="slots" id="slots"><p class="muted">Avval sanani tanlang.</p></div>
-<label data-uz="Ismingiz" data-ru="Ваше имя">Ismingiz</label><input id="name" type="text" placeholder="Ism familiya">
-<label data-uz="Telefon raqamingiz" data-ru="Номер телефона">Telefon raqamingiz</label><input id="phone" type="tel" placeholder="+998 90 123 45 67">
-<button class="primary" id="submit" data-uz="Yozilishni tasdiqlash" data-ru="Подтвердить запись">Yozilishni tasdiqlash</button><p class="notice" id="notice"></p>
-</section><footer>© {{ shop_name }}</footer></main>
-<script src="{{ url_for('static', filename='app.js') }}"></script></body></html>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+
+<body>
+<main class="app-shell">
+
+<div class="language-row">
+    <span class="top-mark">✦ ONLINE BOOKING</span>
+    <button id="lang-toggle" class="lang-toggle">РУССКИЙ</button>
+</div>
+
+<header class="hero">
+    <div class="logo">✂</div>
+    <h1>{{ shop_name }}</h1>
+    <p data-uz="MUTAXASSISNI TANLANG" data-ru="ВЫБЕРИТЕ МАСТЕРА">MUTAXASSISNI TANLANG</p>
+    <div class="line"></div>
+</header>
+
+<section>
+    <h2 class="section-title" data-uz="Mutaxassislar" data-ru="Мастера">Mutaxassislar</h2>
+    <div class="cards">
+        {% for s in stylists %}
+        <button class="stylist-card" type="button" data-id="{{ s.id }}" data-name="{{ s.name }}">
+            <span class="avatar">
+                {% if s.photo %}
+                    <img src="{{ url_for('static', filename=s.photo) }}" alt="{{ s.name }}">
+                {% else %}
+                    {{ s.name[:1] }}
+                {% endif %}
+            </span>
+            <span class="person">
+                <strong>{{ s.name }}</strong>
+                <small>{{ s.title or 'BARBER' }}</small>
+                {% if s.experience %}
+                    <small>{{ s.experience }} tajriba</small>
+                {% endif %}
+            </span>
+            <span class="arrow">›</span>
+        </button>
+        {% endfor %}
+    </div>
+</section>
+
+<section id="stylist-profile" class="profile-panel hidden" aria-live="polite">
+    <div class="profile-heading">
+        <h2 class="section-title" data-uz="Sartarosh haqida" data-ru="О мастере">Sartarosh haqida</h2>
+    </div>
+    <div id="profile-content"></div>
+    <div id="certificate-area"></div>
+</section>
+
+<section class="booking hidden" id="booking">
+    <h2 class="section-title" data-uz="Yozilish ma’lumotlari" data-ru="Данные записи">Yozilish ma’lumotlari</h2>
+
+    <div class="selected" id="selected-stylist">Mutaxassis tanlanmagan</div>
+
+    <label data-uz="Xizmat turi" data-ru="Услуга">Xizmat turi</label>
+    <div id="service-gallery" class="service-gallery"></div>
+
+    <select id="service" disabled>
+        <option value="">Avval sartaroshni tanlang</option>
+        {% for s in services %}
+        <option
+            value="{{ s.id }}"
+            data-stylist="{{ s.stylist_id }}"
+            data-photo="{{ s.photo or '' }}"
+            data-description="{{ s.description or '' }}"
+            data-price="{{ s.price }}"
+            data-duration="{{ s.duration }}"
+            data-name-uz="{{ s.name }}"
+            data-name-ru="{{ s.name_ru }}"
+        >{{ s.name }} — {{ "{:,}".format(s.price).replace(',', ' ') }} so‘m | Davomiyligi: {{ s.duration }} daqiqa</option>
+        {% endfor %}
+    </select>
+
+    <label data-uz="Sana" data-ru="Дата">Sana</label>
+    <input id="date" type="date">
+
+    <label data-uz="Bo‘sh vaqt" data-ru="Свободное время">Bo‘sh vaqt</label>
+    <div class="slots" id="slots">
+        <p class="muted">Avval sanani tanlang.</p>
+    </div>
+
+    <label data-uz="Ismingiz" data-ru="Ваше имя">Ismingiz</label>
+    <input id="name" type="text" placeholder="Ism familiya">
+
+    <label data-uz="Telefon raqamingiz" data-ru="Номер телефона">Telefon raqamingiz</label>
+    <input id="phone" type="tel" placeholder="+998 90 123 45 67">
+
+    <button class="primary" id="submit" data-uz="Yozilishni tasdiqlash" data-ru="Подтвердить запись">Yozilishni tasdiqlash</button>
+    <p class="notice" id="notice"></p>
+</section>
+
+<footer>© {{ shop_name }}</footer>
+
+</main>
+
+<script>
+window.HAWK_STYLISTS = {{ stylist_data|tojson }};
+window.HAWK_CERTIFICATES = {{ certificate_data|tojson }};
+</script>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
