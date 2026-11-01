@@ -244,6 +244,9 @@ def validate_telegram_init_data(init_data):
     except Exception:
         return None
 
+@app.route("/health")
+def health():
+    return {"status": "ok"}, 200
 
 @app.get("/")
 def landing():
