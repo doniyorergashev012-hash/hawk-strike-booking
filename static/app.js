@@ -7,7 +7,13 @@ const today=new Date(), localToday=new Date(today.getTime()-today.getTimezoneOff
 dateInput.min=localToday; dateInput.value=localToday;
 const requestedService = new URLSearchParams(window.location.search).get("service");
 
-function staticUrl(path){return path?`/static/${String(path).replace(/^\/+/,"")}`:"";}
+// ImageKit URL'larini o'zgartirmay ishlatadi; eski local yo'llarni ham qo'llab-quvvatlaydi.
+function staticUrl(path){
+  if(!path) return "";
+  const value=String(path).trim();
+  if(/^https?:\/\//i.test(value) || value.startsWith("data:")) return value;
+  return `/static/${value.replace(/^\/+/,"")}`;
+}
 function addText(parent,tag,className,text){const el=document.createElement(tag);if(className)el.className=className;el.textContent=text||"";parent.appendChild(el);return el;}
 function setLanguage(next) {
   lang=next; document.documentElement.lang=lang;
@@ -65,8 +71,8 @@ function filterServices(){
     addText(body,"strong","",lang==="ru"?(o.dataset.nameRu||o.dataset.nameUz):o.dataset.nameUz);
     addText(body,"span","service-description",o.dataset.description||"");
     addText(body,"span","service-price",`${Number(o.dataset.price).toLocaleString("ru-RU")} so‘m`);
-addText(body,"span","service-description",`${lang==="uz"?"Davomiyligi: ":"Длительность: "}${o.dataset.duration} daqiqa`);
-    card.addEventListener("click",()=>{service.value=o.value;gallery.querySelectorAll(".service-card").forEach(c=>c.classList.remove("selected-service"));card.classList.add("selected-service");});
+    addText(body,"span","service-description",`${lang==="uz"?"Davomiyligi: ":"Длительность: "}${o.dataset.duration} daqiqa`);
+    card.addEventListener("click",()=>{service.value=o.value;gallery.querySelectorAll(".service-card").forEach(c=>c.classList.remove("selected-service"));card.classList.add("selected-service");loadSlots();});
     gallery.appendChild(card);
   });
 }
@@ -85,7 +91,7 @@ async function loadSlots(){
   selectedTime=null;$("slots").innerHTML=`<p class="muted">${lang==="uz"?"Yuklanmoqda...":"Загрузка..."}</p>`;
   if(!stylistId||!dateInput.value)return;
   try{const serviceId = Number($("service").value);
-const r = await fetch(`/api/slots?stylist_id=${stylistId}&date=${dateInput.value}&service_id=${serviceId}`), d = await r.json();$("slots").replaceChildren();
+    const r = await fetch(`/api/slots?stylist_id=${stylistId}&date=${dateInput.value}&service_id=${serviceId}`), d = await r.json();$("slots").replaceChildren();
     if(!d.slots?.length){addText($("slots"),"p","muted",lang==="uz"?"Bo‘sh vaqt qolmagan.":"Свободного времени нет.");return;}
     d.slots.forEach(t=>{const b=document.createElement("button");b.type="button";b.className="slot";b.textContent=t;
       b.onclick=()=>{document.querySelectorAll(".slot").forEach(x=>x.classList.remove("chosen"));b.classList.add("chosen");selectedTime=t;};$("slots").appendChild(b);});
