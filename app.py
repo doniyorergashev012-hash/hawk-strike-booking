@@ -28,11 +28,22 @@ APP_URL = os.getenv("APP_URL", "https://example.com")
 ADMIN_USER = os.getenv("ADMIN_USER", "admin")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "change-me")
 TELEGRAM_WEBHOOK_SECRET = os.getenv("TELEGRAM_WEBHOOK_SECRET", "")
-UPLOAD_DIR = os.path.join(BASE_DIR, "static", "uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+IMAGEKIT_PRIVATE_KEY = os.getenv("IMAGEKIT_PRIVATE_KEY", "").strip()
+IMAGEKIT_PUBLIC_KEY = os.getenv("IMAGEKIT_PUBLIC_KEY", "").strip()
+IMAGEKIT_URL_ENDPOINT = os.getenv("IMAGEKIT_URL_ENDPOINT", "").strip().rstrip("/")
 
-2
+
+@app.template_global("image_src")
+def image_src(path):
+    """Return hosted image URLs unchanged; keep compatibility with old local paths."""
+    if not path:
+        return ""
+    value = str(path).strip()
+    if value.startswith(("https://", "http://")):
+        return value
+    return url_for("static", filename=value.lstrip("/"))
+
 class DatabaseConnection:
     """Small adapter so the same SQL works with local SQLite and hosted PostgreSQL."""
     def __init__(self):
@@ -549,15 +560,44 @@ def booking_action(booking_id, action):
 
 
 def save_image(file_storage):
+    """Upload an image to ImageKit and return its permanent HTTPS URL."""
     if not file_storage or not file_storage.filename:
         return ""
+
     original = secure_filename(file_storage.filename)
     ext = original.rsplit(".", 1)[-1].lower() if "." in original else ""
     if ext not in ALLOWED_IMAGE_EXTENSIONS:
         raise ValueError("Faqat PNG, JPG, JPEG yoki WEBP rasmlar qabul qilinadi.")
-    filename = f"{uuid.uuid4().hex}.{ext}"
-    file_storage.save(os.path.join(UPLOAD_DIR, filename))
-    return f"uploads/{filename}"
+
+    if not IMAGEKIT_PRIVATE_KEY:
+        raise ValueError("ImageKit sozlanmagan: Render Environment Variables ichida IMAGEKIT_PRIVATE_KEY yo‘qligini tekshiring.")
+
+    filename = f"curlvex_{uuid.uuid4().hex}.{ext}"
+    try:
+        file_storage.stream.seek(0)
+        response = requests.post(
+            "https://upload.imagekit.io/api/v1/files/upload",
+            auth=(IMAGEKIT_PRIVATE_KEY, ""),
+            data={"fileName": filename, "useUniqueFileName": "true"},
+            files={"file": (filename, file_storage.stream, file_storage.mimetype or "application/octet-stream")},
+            timeout=60,
+        )
+    except requests.RequestException as exc:
+        app.logger.exception("ImageKit upload request failed")
+        raise ValueError("Rasmni ImageKit’ga yuklashda aloqa xatosi yuz berdi. Qayta urinib ko‘ring.") from exc
+
+    if not response.ok:
+        app.logger.error("ImageKit upload failed (%s): %s", response.status_code, response.text[:500])
+        raise ValueError("ImageKit rasmni qabul qilmadi. API kalitlari va ImageKit sozlamalarini tekshiring.")
+
+    try:
+        image_url = response.json().get("url", "").strip()
+    except (ValueError, AttributeError):
+        image_url = ""
+    if not image_url.startswith("https://"):
+        app.logger.error("ImageKit response did not contain a valid HTTPS image URL")
+        raise ValueError("ImageKit javobida rasm manzili topilmadi. Qayta urinib ko‘ring.")
+    return image_url
 
 
 def can_manage_stylist(stylist_id):
