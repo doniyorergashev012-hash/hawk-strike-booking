@@ -30,7 +30,7 @@
         <button class="stylist-card" type="button" data-id="{{ s.id }}" data-name="{{ s.name }}">
             <span class="avatar">
                 {% if s.photo %}
-                    <img src="{{ url_for('static', filename=s.photo) }}" alt="{{ s.name }}">
+                    <img src="{{ image_src(s.photo) }}" alt="{{ s.name }}">
                 {% else %}
                     {{ s.name[:1] }}
                 {% endif %}
