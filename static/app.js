@@ -97,12 +97,24 @@ async function loadSlots(){
       b.onclick=()=>{document.querySelectorAll(".slot").forEach(x=>x.classList.remove("chosen"));b.classList.add("chosen");selectedTime=t;};$("slots").appendChild(b);});
   }catch(e){$("slots").textContent=lang==="uz"?"Vaqtlarni yuklashda xatolik.":"Ошибка загрузки времени.";}
 }
+
+$("phone").addEventListener("input", () => {
+  $("phone").value = $("phone").value
+    .replace(/\D/g, "")
+    .slice(0, 9);
+});
 $("submit").addEventListener("click",async()=>{
   const notice=$("notice");notice.textContent="";
   if(!stylistId||!selectedTime||!$("service").value){notice.textContent=lang==="uz"?"Mutaxassis, xizmat va vaqtni tanlang.":"Выберите мастера, услугу и время.";return;}
   const payload={stylist_id:stylistId,service_id:Number($("service").value),date:dateInput.value,time:selectedTime,
-    name:$("name").value.trim(),phone:$("phone").value.trim(),init_data:tg?.initData||""};
-  if(!payload.name||!payload.phone){notice.textContent=lang==="uz"?"Ism va telefonni kiriting.":"Введите имя и телефон.";return;}
+    name:$("name").value.trim(),phone:"+998"+$("phone").value.replace(/\D/g,""),init_data:tg?.initData||""};
+  const phoneDigits = $("phone").value.replace(/\D/g,"");
+if(!payload.name || phoneDigits.length !== 9){
+  notice.textContent = lang==="uz"
+    ? "Ism va to‘liq telefon raqamini kiriting (+998 dan keyin 9 ta raqam)."
+    : "Введите имя и полный номер телефона (9 цифр после +998).";
+  return;
+}
   const btn=$("submit");btn.disabled=true;
   try{const r=await fetch("/api/book",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}),d=await r.json();
     notice.textContent=d.message;notice.className="notice "+(d.ok?"success":"error");if(d.ok){selectedTime=null;await loadSlots();}
