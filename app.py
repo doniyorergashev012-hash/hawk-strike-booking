@@ -369,8 +369,18 @@ def slots():
 @app.post("/api/book")
 def book():
     data = request.get_json(silent=True) or {}
-    name, phone = (data.get("name") or "").strip(), (data.get("phone") or "").strip()
+
+    name = (data.get("name") or "").strip()
+    phone = (data.get("phone") or "").strip()
+
+    if not phone.startswith("+998") or len(phone) != 13 or not phone[4:].isdigit():
+        return jsonify({
+            "ok": False,
+            "message": "Telefon raqamini to‘liq kiriting (+998 dan keyin 9 ta raqam)."
+        }), 400
+
     day, time = (data.get("date") or "").strip(), (data.get("time") or "").strip()
+
     try:
         stylist_id, service_id = int(data.get("stylist_id")), int(data.get("service_id"))
         if not name or not phone or len(name) > 100 or len(phone) > 30:
