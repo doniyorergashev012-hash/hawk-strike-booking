@@ -92,7 +92,17 @@
     <input id="name" type="text" placeholder="Ism familiya">
 
     <label data-uz="Telefon raqamingiz" data-ru="Номер телефона">Telefon raqamingiz</label>
-    <input id="phone" type="tel" placeholder="+998 90 123 45 67">
+<div style="display:flex;align-items:center;gap:8px">
+    <strong>+998</strong>
+    <input
+        id="phone"
+        type="tel"
+        inputmode="numeric"
+        maxlength="9"
+        placeholder="90 123 45 67"
+        autocomplete="tel-national"
+    >
+</div>
 
     <button class="primary" id="submit" data-uz="Yozilishni tasdiqlash" data-ru="Подтвердить запись">Yozilishni tasdiqlash</button>
     <p class="notice" id="notice"></p>
